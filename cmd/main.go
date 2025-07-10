@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/MdSadiqMd/Phone-Normalisier/pkg"
+)
 
 func main() {
-	fmt.Println("Hello World!")
+	fmt.Println(pkg.Normalize("(123) 456-7890"))
 }
