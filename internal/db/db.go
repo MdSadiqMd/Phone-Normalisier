@@ -19,6 +19,8 @@ func ConnectToDB() {
 	defer db.Close()
 
 	must(createPhoneNumberTable(db))
+	_, err = insertData(db, "123456789")
+	must(err)
 	must(db.Ping())
 }
 
@@ -39,6 +41,16 @@ func createPhoneNumberTable(db *sql.DB) error {
 	`
 	_, err := db.Exec(statement)
 	return err
+}
+
+func insertData(db *sql.DB, phone string) (int, error) {
+	statement := `INSERT INTO phone_numbers(value) VALUES($1) RETURNING id`
+	var id int
+	err := db.QueryRow(statement, phone).Scan(&id)
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
 }
 
 func must(err error) {
