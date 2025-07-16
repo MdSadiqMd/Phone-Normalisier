@@ -34,6 +34,13 @@ func ConnectToDB() {
 		number := pkg.Normalize(p.number)
 		if number != p.number {
 			fmt.Println("Updating or Remvoing...", number)
+			existing, err := findNumber(db, number)
+			must(err)
+			if existing != nil {
+
+			} else {
+
+			}
 		} else {
 			fmt.Println("No changes required")
 		}
@@ -108,6 +115,21 @@ func allPhones(db *sql.DB) ([]phone, error) {
 		return nil, err
 	}
 	return ret, nil
+}
+
+func findNumber(db *sql.DB, number string) (*phone, error) {
+	var p phone
+	statement := `SELECT * FROM phone_numbers WHERE value=$1`
+	row := db.QueryRow(statement, number)
+	err := row.Scan(&p.id, &p.number)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	return &p, nil
 }
 
 func must(err error) {
