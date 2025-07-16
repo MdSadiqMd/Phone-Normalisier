@@ -2,9 +2,9 @@ package repo
 
 import "database/sql"
 
-type phone struct {
-	id     int
-	number string
+type Phone struct {
+	Id     int
+	Number string
 }
 
 func InsertData(db *sql.DB, phone string) (int, error) {
@@ -27,7 +27,7 @@ func GetPhone(db *sql.DB, id int) (string, error) {
 	return number, nil
 }
 
-func AllPhones(db *sql.DB) ([]phone, error) {
+func AllPhones(db *sql.DB) ([]Phone, error) {
 	statement := `SELECT id, value FROM phone_numbers`
 	rows, err := db.Query(statement)
 	if err != nil {
@@ -35,10 +35,10 @@ func AllPhones(db *sql.DB) ([]phone, error) {
 	}
 	defer rows.Close()
 
-	var ret []phone
+	var ret []Phone
 	for rows.Next() {
-		var p phone
-		err := rows.Scan(&p.id, &p.number)
+		var p Phone
+		err := rows.Scan(&p.Id, &p.Number)
 		if err != nil {
 			return nil, err
 		}
@@ -52,11 +52,11 @@ func AllPhones(db *sql.DB) ([]phone, error) {
 	return ret, nil
 }
 
-func FindNumber(db *sql.DB, number string) (*phone, error) {
-	var p phone
+func FindNumber(db *sql.DB, number string) (*Phone, error) {
+	var p Phone
 	statement := `SELECT * FROM phone_numbers WHERE value=$1`
 	row := db.QueryRow(statement, number)
-	err := row.Scan(&p.id, &p.number)
+	err := row.Scan(&p.Id, &p.Number)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -67,9 +67,9 @@ func FindNumber(db *sql.DB, number string) (*phone, error) {
 	return &p, nil
 }
 
-func UpdateNumber(db *sql.DB, p phone) error {
+func UpdateNumber(db *sql.DB, p Phone) error {
 	statement := `UPDATE phone_numbers SET value=$2 WHERE id=$1`
-	_, err := db.Exec(statement, p.id, p.number)
+	_, err := db.Exec(statement, p.Id, p.Number)
 	return err
 }
 
