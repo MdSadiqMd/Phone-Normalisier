@@ -37,9 +37,10 @@ func ConnectToDB() {
 			existing, err := findNumber(db, number)
 			must(err)
 			if existing != nil {
-
+				deleteNumber(db, p.id)
 			} else {
-
+				p.number = number
+				updateNumber(db, p)
 			}
 		} else {
 			fmt.Println("No changes required")
@@ -130,6 +131,18 @@ func findNumber(db *sql.DB, number string) (*phone, error) {
 		}
 	}
 	return &p, nil
+}
+
+func updateNumber(db *sql.DB, p phone) error {
+	statement := `UPDATE phone_numbers SET value=$2 WHERE id=$1`
+	_, err := db.Exec(statement, p.id, p.number)
+	return err
+}
+
+func deleteNumber(db *sql.DB, id int) error {
+	statement := `DELETE FROM phone_numbers WHERE ID=$1`
+	_, err := db.Exec(statement, id)
+	return err
 }
 
 func must(err error) {
