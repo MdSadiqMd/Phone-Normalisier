@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/MdSadiqMd/Phone-Normalisier/pkg"
+	_ "github.com/lib/pq"
 )
 
 func main() {
