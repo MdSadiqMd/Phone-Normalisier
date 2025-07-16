@@ -2,6 +2,9 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+
+	"github.com/MdSadiqMd/Phone-Normalisier/pkg"
 )
 
 func ConnectToDB() {
@@ -21,7 +24,26 @@ func ConnectToDB() {
 	must(createPhoneNumberTable(db))
 	_, err = insertData(db, "123456789")
 	must(err)
+	number, err := getPhone(db, 1)
+	must(err)
+	fmt.Println("number:= ", number)
+	numbers, err := allPhones(db)
+	must(err)
+	for _, p := range numbers {
+		fmt.Printf("working on ....%v\n", p)
+		number := pkg.Normalize(p.number)
+		if number != p.number {
+			fmt.Println("Updating or Remvoing...", number)
+		} else {
+			fmt.Println("No changes required")
+		}
+	}
 	must(db.Ping())
+}
+
+type phone struct {
+	id     int
+	number string
 }
 
 func createDatabase(db *sql.DB, name string) error {
@@ -51,6 +73,41 @@ func insertData(db *sql.DB, phone string) (int, error) {
 		return -1, err
 	}
 	return id, nil
+}
+
+func getPhone(db *sql.DB, id int) (string, error) {
+	statement := `SELECT value FROM phone_numbers WHERE id=$1`
+	var number string
+	err := db.QueryRow(statement, id).Scan(&number)
+	if err != nil {
+		panic(err)
+	}
+	return number, nil
+}
+
+func allPhones(db *sql.DB) ([]phone, error) {
+	statement := `SELECT id, value FROM phone_numbers`
+	rows, err := db.Query(statement)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ret []phone
+	for rows.Next() {
+		var p phone
+		err := rows.Scan(&p.id, &p.number)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, p)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 
 func must(err error) {
